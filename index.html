@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A heartfelt, interactive digital love letter.">
+  <title>For my baby</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23ff5fa8' d='M50 88 16 54C4 42 4 23 17 13c10-8 25-6 33 5 8-11 23-13 33-5 13 10 13 29 1 41L50 88z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient-hearts" aria-hidden="true"></div>
+
+  <div id="loading-screen" class="loading-screen" aria-live="polite">
+    <div class="loader-heart" aria-hidden="true"></div>
+    <span class="sr-only">Loading</span>
+  </div>
+
+  <main class="app-shell">
+    <section id="welcome" class="screen active" aria-labelledby="welcome-title">
+      <div class="glass-panel hero-panel">
+        <p class="eyebrow">A little something</p>
+        <h1 id="welcome-title">Hi, <span data-name>[Her Name]</span> <span aria-hidden="true">🌸</span></h1>
+        <p class="lead">I made something for you.</p>
+        <button class="primary-btn" data-next="letter">Open</button>
+      </div>
+    </section>
+
+    <section id="letter" class="screen" aria-labelledby="letter-title">
+      <article class="glass-panel letter-panel">
+        <p class="eyebrow">A short letter</p>
+        <h2 id="letter-title">For you</h2>
+        <div id="letter-text" class="letter-text" aria-live="polite"></div>
+        <button class="primary-btn hidden-action" data-next="reasons">Continue</button>
+      </article>
+    </section>
+
+    <section id="reasons" class="screen" aria-labelledby="reasons-title">
+      <div class="section-wrap">
+        <p class="eyebrow">Why you</p>
+        <h2 id="reasons-title">Three little truths</h2>
+        <div class="reason-grid">
+          <article class="reason-card">
+            <span class="card-mark" aria-hidden="true">01</span>
+            <p>I like talking to you.</p>
+          </article>
+          <article class="reason-card">
+            <span class="card-mark" aria-hidden="true">02</span>
+            <p>You make ordinary days feel lighter.</p>
+          </article>
+          <article class="reason-card">
+            <span class="card-mark" aria-hidden="true">03</span>
+            <p>I’d like to know you more.</p>
+          </article>
+        </div>
+        <button class="primary-btn" data-next="question">One last thing...</button>
+      </div>
+    </section>
+
+    <section id="question" class="screen question-screen" aria-labelledby="question-title">
+      <div class="glass-panel question-panel">
+        <p class="eyebrow">With sincerity</p>
+        <h2 id="question-title">Can I court you? <span aria-hidden="true">🌷</span></h2>
+        <p class="lead">No pressure. I just wanted to ask sincerely.</p>
+        <p id="no-message" class="no-message" aria-live="polite"></p>
+        <div class="choice-row">
+          <button id="yes-btn" class="choice-btn yes-btn" type="button">❤️ Yes</button>
+          <button id="no-btn" class="choice-btn no-btn" type="button">🙈 No</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="success" class="screen success-screen" aria-labelledby="success-title">
+      <div class="success-glow" aria-hidden="true"></div>
+      <article class="glass-panel success-panel">
+        <p class="eyebrow">Thank you</p>
+        <h2 id="success-title">You just made me really happy. <span aria-hidden="true">❤️</span></h2>
+        <p>Thank you for giving me the chance to court you.</p>
+        <p>I’ll do my best to get to know you better, respect you, and show you sincerity through my actions.</p>
+      </article>
+    </section>
+
+    <section id="respect" class="screen" aria-labelledby="respect-title">
+      <article class="glass-panel success-panel">
+        <p class="eyebrow">Honesty matters</p>
+        <h2 id="respect-title">Thank you for being honest.</h2>
+        <p>I appreciate your answer and respect it.</p>
+      </article>
+    </section>
+  </main>
+
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+  <script src="script.js"></script>
+</body>
+</html>
