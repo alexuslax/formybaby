@@ -1,11 +1,12 @@
 const HER_NAME = "Xhane";
 
+
 const state = {
   currentScreen: "welcome",
   noAttempts: 0,
   noCanClick: false,
   noMoveLocked: false,
-  typingStarted: false,
+  letterShown: false,
   heartTimer: null
 };
 
@@ -20,20 +21,60 @@ const noMessage = document.querySelector("#no-message");
 const heartLayer = document.querySelector(".ambient-hearts");
 const confettiCanvas = document.querySelector("#confetti-canvas");
 const confettiContext = confettiCanvas.getContext("2d");
+const bgMusic = document.querySelector("#bg-music");
 
-const letter = `Hi, ${HER_NAME}.
+const letter = `Hindi ikaw ang una,
+pero ikaw ang nauna.
 
-I’ve been wanting to tell you something for a while now.
+Nauna mong iparamdam
+na ang pagmamahal ay hindi dapat mabigat,
+dahil sa tunay na pag-ibig,
+dalawa ang sabay na nagbubuhat.
 
-Getting to know you has genuinely become one of my favorite parts of my day. Every conversation, every laugh, and even the small moments mean a lot to me.
+Nauna mong pakinggan
+ang mapait kong nakaraan,
+at hindi mo ako minadaling
+kalimutan ang sakit na dala ko.
 
-So I just wanted to ask you something sincerely.`;
+Nauna mong yakapin
+ang mga parte ko
+na kahit ako mismo
+ay hirap tanggapin.
+
+Nauna mong buksan
+ang puso kong sarado,
+at tinuruan mo itong
+huwag matakot magmahal muli.
+
+At marahil,
+iyon ang dahilan
+kung bakit,
+kahit hindi ikaw ang una,
+
+ikaw ang naunang
+nagpakilala sa akin
+ng tunay na kahulugan
+ng pagmamahal.
+
+At mula noon,
+ikaw na ang naging
+pamantayan
+ng bawat pag-ibig
+na nanaisin ko.`;
+const secondColumnStart = "Nauna mong buksan";
 
 const noMessages = [
   "Are you sure? 🥺",
-  "Think again...",
-  "Nice try 😂",
-  "Maybe the other button? ❤️"
+  "AYAW MO HA?????",
+  "BABY NAMAAAAAAN!!!!",
+  "SIGE TALAGA",
+  "BAHALA KA DYAN CHEEE",
+  "PAG AKO UMIYAK",
+  "TAMA NA KASI",
+  "YUNG LUHA KO TEH",
+  "HINDI MO NA AKO MAIIWASAN",
+  "BABY SUNTUKAN NALANG OH",
+  "SUMUSOBRA KANA TALAGA"
 ];
 
 function showScreen(screenId) {
@@ -43,9 +84,9 @@ function showScreen(screenId) {
 
   state.currentScreen = screenId;
 
-  if (screenId === "letter" && !state.typingStarted) {
-    state.typingStarted = true;
-    typeLetter();
+  if (screenId === "letter" && !state.letterShown) {
+    state.letterShown = true;
+    showLetter();
   }
 
   if (screenId === "success") {
@@ -53,28 +94,23 @@ function showScreen(screenId) {
   }
 }
 
-function typeLetter() {
-  let index = 0;
-  letterText.textContent = "";
-  continueLetterButton.classList.remove("visible");
+function showLetter() {
+  const splitIndex = letter.indexOf(secondColumnStart);
+  const columns = splitIndex === -1
+    ? [letter]
+    : [letter.slice(0, splitIndex).trim(), letter.slice(splitIndex).trim()];
 
-  const typeNext = () => {
-    letterText.textContent = letter.slice(0, index);
-    index += 1;
+  letterText.replaceChildren(...columns.map((column) => {
+    const letterColumn = document.createElement("div");
+    letterColumn.className = "letter-column";
+    letterColumn.textContent = column;
+    return letterColumn;
+  }));
 
-    if (index <= letter.length) {
-      window.setTimeout(typeNext, letter[index - 1] === "\n" ? 120 : 28);
-      return;
-    }
-
-    letterText.classList.add("done");
-    continueLetterButton.classList.add("visible");
-  };
-
-  typeNext();
+  continueLetterButton.classList.add("visible");
 }
 
-function moveNoButton() {
+function moveNoButton(pointerX, pointerY) {
   if (state.noMoveLocked) return;
   state.noMoveLocked = true;
 
@@ -84,24 +120,31 @@ function moveNoButton() {
   const rowRect = choiceRow.getBoundingClientRect();
   const maxLeft = Math.max(margin, rowRect.width - rect.width - margin);
   const maxTop = Math.max(margin, rowRect.height - rect.height - margin);
-  const directions = [
-    { x: -1, y: 0 },
-    { x: 1, y: 0 },
-    { x: 0, y: -1 },
-    { x: 0, y: 1 },
-    { x: -1, y: -1 },
-    { x: 1, y: -1 },
-    { x: -1, y: 1 },
-    { x: 1, y: 1 }
-  ];
-  const direction = directions[Math.floor(Math.random() * directions.length)];
   const currentLeft = noButton.classList.contains("dodging") ? rect.left - rowRect.left : rowRect.width - rect.width - margin;
   const currentTop = noButton.classList.contains("dodging") ? rect.top - rowRect.top : margin;
-  const stepX = randomBetween(90, 180);
-  const stepY = randomBetween(70, 150);
-  let left = clamp(currentLeft + direction.x * stepX, margin, maxLeft);
-  let top = clamp(currentTop + direction.y * stepY, margin, maxTop);
 
+  const buttonCenterX = rect.left + rect.width / 2;
+  const buttonCenterY = rect.top + rect.height / 2;
+
+  let directionX = buttonCenterX - (pointerX ?? buttonCenterX);
+  let directionY = buttonCenterY - (pointerY ?? buttonCenterY);
+  const directionLength = Math.hypot(directionX, directionY);
+
+  if (directionLength < 1) {
+    // Pointer is essentially on top of the button; pick a gentle random escape.
+    const angle = randomBetween(0, Math.PI * 2);
+    directionX = Math.cos(angle);
+    directionY = Math.sin(angle);
+  } else {
+    directionX /= directionLength;
+    directionY /= directionLength;
+  }
+
+  const distance = randomBetween(120, 200);
+  let left = clamp(currentLeft + directionX * distance, margin, maxLeft);
+  let top = clamp(currentTop + directionY * distance, margin, maxTop);
+
+  // If clamping collapsed the move (e.g. cornered), pick a free spot instead of staying put.
   if (Math.abs(left - currentLeft) < 12 && Math.abs(top - currentTop) < 12) {
     left = randomBetween(margin, maxLeft);
     top = randomBetween(margin, maxTop);
@@ -110,14 +153,14 @@ function moveNoButton() {
   noButton.classList.add("dodging");
   noButton.style.left = `${left}px`;
   noButton.style.top = `${top}px`;
-  noButton.style.transform = `rotate(${randomBetween(-3, 3)}deg)`;
+  noButton.style.transform = `rotate(${randomBetween(-2, 2)}deg)`;
 
   state.noAttempts += 1;
   noMessage.textContent = noMessages[(state.noAttempts - 1) % noMessages.length];
 
   window.setTimeout(() => {
     state.noMoveLocked = false;
-  }, 760);
+  }, 480);
 }
 
 function handlePointerMove(event) {
@@ -128,11 +171,14 @@ function handlePointerMove(event) {
   const buttonCenterY = rect.top + rect.height / 2;
   const distance = Math.hypot(event.clientX - buttonCenterX, event.clientY - buttonCenterY);
 
-  if (distance < 95) moveNoButton();
+  if (distance < 110) moveNoButton(event.clientX, event.clientY);
 }
 
-function handleNoChoice() {
-  moveNoButton();
+function handleNoChoice(event) {
+  const rect = noButton.getBoundingClientRect();
+  const fallbackX = rect.left + rect.width / 2;
+  const fallbackY = rect.top + rect.height / 2;
+  moveNoButton(event?.clientX ?? fallbackX, event?.clientY ?? fallbackY);
 }
 
 function keepNoButtonInView() {
@@ -241,27 +287,72 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function startMusic() {
+  if (!bgMusic) return;
+  bgMusic.volume = 0.55;
+
+  // Browsers allow autoplay if the audio starts muted.
+  bgMusic.muted = true;
+  bgMusic.play().catch((error) => {
+    console.warn("Music could not autoplay yet:", error);
+  });
+
+  // Regardless of whether muted autoplay succeeds or gets blocked,
+  // always arm the fallback so the very first tap/scroll/keypress
+  // guarantees sound starts.
+  armUnmuteOnFirstInteraction();
+}
+
+function unmuteMusic() {
+  if (!bgMusic) return;
+  bgMusic.muted = false;
+
+  if (bgMusic.paused) {
+    bgMusic.play().catch((error) => {
+      console.warn("Music still could not play:", error);
+    });
+  }
+}
+
+function armUnmuteOnFirstInteraction() {
+  const events = ["pointerdown", "keydown", "touchstart", "wheel", "mousemove"];
+
+  function handleFirstInteraction() {
+    unmuteMusic();
+    events.forEach((eventName) => {
+      document.removeEventListener(eventName, handleFirstInteraction);
+    });
+  }
+
+  events.forEach((eventName) => {
+    document.addEventListener(eventName, handleFirstInteraction, { once: true, passive: true });
+  });
+}
+
 function init() {
   document.querySelectorAll("[data-name]").forEach((node) => {
     node.textContent = HER_NAME;
   });
 
   nextButtons.forEach((button) => {
-    button.addEventListener("click", () => showScreen(button.dataset.next));
+    button.addEventListener("click", () => {
+      showScreen(button.dataset.next);
+    });
   });
 
   yesButton.addEventListener("click", handleYesChoice);
   noButton.addEventListener("click", handleNoChoice);
-  noButton.addEventListener("mouseenter", moveNoButton);
+  noButton.addEventListener("mouseenter", (event) => moveNoButton(event.clientX, event.clientY));
   document.addEventListener("pointermove", handlePointerMove);
   window.addEventListener("resize", resizeCanvas);
 
   resizeCanvas();
   startHearts();
+  startMusic();
 
   window.setTimeout(() => {
     loader.classList.add("hide");
-  }, 950);
+  }, 2500);
 }
 
 document.addEventListener("DOMContentLoaded", init);
